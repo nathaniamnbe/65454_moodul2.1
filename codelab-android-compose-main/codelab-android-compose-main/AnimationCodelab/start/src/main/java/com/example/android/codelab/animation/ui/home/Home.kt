@@ -342,7 +342,7 @@ private fun EditMessage(shown: Boolean) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.secondary,
-            shadowElevation = 4.dp 
+            shadowElevation = 4.dp
         ) {
             Text(
                 text = stringResource(R.string.edit_message),
@@ -412,6 +412,7 @@ private fun TopicRow(topic: String, expanded: Boolean, onClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .animateContentSize()
         ) {
             Row {
                 Icon(
