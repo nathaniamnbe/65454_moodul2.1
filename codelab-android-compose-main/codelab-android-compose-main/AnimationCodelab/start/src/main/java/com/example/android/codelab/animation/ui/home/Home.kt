@@ -108,9 +108,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
@@ -495,10 +497,56 @@ private fun HomeTabIndicator(
     tabPositions: List<TabPosition>,
     tabPage: TabPage
 ) {
-    // TODO 4: Animate these value changes.
-    val indicatorLeft = tabPositions[tabPage.ordinal].left
-    val indicatorRight = tabPositions[tabPage.ordinal].right
-    val color = if (tabPage == TabPage.Home) PaleDogwood else Green
+    val transition = updateTransition(
+        targetState = tabPage,
+        label = "Tab indicator"
+    )
+
+    val indicatorLeft by transition.animateDp(
+        transitionSpec = {
+            if (TabPage.Home isTransitioningTo TabPage.Work) {
+                spring(stiffness = Spring.StiffnessVeryLow)
+            } else {
+                spring(stiffness = Spring.StiffnessMedium)
+            }
+        },
+        label = "Indicator left"
+    ) { page ->
+        tabPositions[page.ordinal].left
+    }
+
+    val indicatorRight by transition.animateDp(
+        transitionSpec = {
+            if (TabPage.Home isTransitioningTo TabPage.Work) {
+                spring(stiffness = Spring.StiffnessMedium)
+            } else {
+                spring(stiffness = Spring.StiffnessVeryLow)
+            }
+        },
+        label = "Indicator right"
+    ) { page ->
+        tabPositions[page.ordinal].right
+    }
+
+    val color by transition.animateColor(
+        transitionSpec = { tween(durationMillis = 500) },
+        label = "Border color"
+    ) { page ->
+        if (page == TabPage.Home) PaleDogwood else Green
+    }
+
+    val scale by transition.animateFloat(
+        transitionSpec = { spring(stiffness = Spring.StiffnessLow) },
+        label = "Indicator scale"
+    ) { 1.1f }
+
+    val alpha by transition.animateFloat(
+        transitionSpec = { tween(durationMillis = 300) },
+        label = "Indicator alpha"
+    ) { page ->
+        if (page == TabPage.Home) 1f else 0.7f
+    }
+
     Box(
         Modifier
             .fillMaxSize()
@@ -507,11 +555,14 @@ private fun HomeTabIndicator(
             .width(indicatorRight - indicatorLeft)
             .padding(4.dp)
             .fillMaxSize()
+            .scale(scale)
+            .graphicsLayer { this.alpha = alpha }
             .border(
                 BorderStroke(2.dp, color),
                 RoundedCornerShape(4.dp)
             )
     )
+
 }
 
 /**
